@@ -11,13 +11,6 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
       - agentdemo
-
-  redis:
-    image: redis:7.2.3-alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - agentdemo
   
   jaeger:
     image: jaegertracing/all-in-one

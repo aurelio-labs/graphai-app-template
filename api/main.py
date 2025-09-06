@@ -1,4 +1,4 @@
-from api.api.app import app
+from pluto.app import app
 
 if __name__ == "__main__":
     import uvicorn

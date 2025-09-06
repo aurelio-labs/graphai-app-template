@@ -1,10 +1,12 @@
-FROM python:3.12.7-slim as builder
+FROM python:3.13-slim-bookworm as builder
 
 LABEL maintainer="aurelio"
 LABEL vendor="aurelio"
 
 ARG DOCKER_IMAGE_TAG
-ENV PYTHONPATH=/app \
+ENV PATH="/root/.cargo/bin/:$PATH" \
+    PATH="/root/.local/bin/:$PATH" \
+    PYTHONPATH=/app \
     PYTHONFAULTHANDLER=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -12,33 +14,45 @@ ENV PYTHONPATH=/app \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_REQUESTS_TIMEOUT=6000\
     PIP_ROOT_USER_ACTION=ignore \
-    POETRY_VERSION=2.0.1 \
-    POETRY_CACHE_DIR='/var/cache/poetry' \
-    LANG=C.UTF-8
+    LANG=C.UTF-8 \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python3.13
 
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential linux-headers-generic \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential \
+        linux-headers-generic \
+        curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir poetry pip --upgrade
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    ln -sf /root/.cargo/bin/uv /usr/local/bin/uv && \
+    uv --version
 
 WORKDIR /app
-# Copy only requirements and local module to cache them in docker layer
-COPY poetry.lock pyproject.toml ./
-COPY api ./api
-COPY main.py ./main.py
-COPY README.md README.md
 
-# Project initialization:
-RUN poetry config installer.max-workers 20 \
-    && poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi \
-    && rm -rf $POETRY_CACHE_DIR
+# Copy package files
+COPY pyproject.toml uv.lock ./
+COPY README.md ./
+
+# Install dependencies first (without the package itself)
+RUN uv sync --frozen --no-dev
+
+# Copy the package source code
+COPY pluto ./pluto
+COPY main.py ./
+
+# Install the package itself
+RUN uv sync --frozen --no-dev
 
 FROM builder as runtime
+
+ENV PATH="/app/.venv/bin:$PATH"
+
 WORKDIR /app
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--loop", "uvloop"]
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--loop", "uvloop", "--reload"]
