@@ -4,7 +4,7 @@ from graphai.callback import EventCallback
 
 # define simple nodes
 @node(start=True)
-def start(input: dict) -> dict:
+async def start(input: dict) -> dict:
     return {"input": input}
 
 @router(stream=True)

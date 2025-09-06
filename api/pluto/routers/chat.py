@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Request
 from graphai.callback import EventCallback
 from starlette.responses import StreamingResponse
 
-from api.schemas import Message
+from pluto.schemas import Message
 
 router = APIRouter()
 
@@ -12,6 +12,7 @@ async def gen(callback: EventCallback):
     async for token in callback.aiter():
         yield token
 
+@router.post("/chat")
 async def chat(request: Request, message: Message = Body(...)):
     # init new callback
     callback = EventCallback()

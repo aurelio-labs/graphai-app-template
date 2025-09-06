@@ -5,8 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from openai import AsyncOpenAI
 
-from api.agent import get_graph
-from api.routers.chat import router as chat_router
+from pluto.agent import get_graph
+from pluto.routers.chat import router as chat_router
 
 
 @asynccontextmanager
