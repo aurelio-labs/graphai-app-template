@@ -15,4 +15,5 @@ export interface ChatOutput {
   response: string
   isComplete: boolean
   toolCalls: ToolCall[]
+  isUserOnly?: boolean
 }

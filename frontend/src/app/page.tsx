@@ -38,17 +38,30 @@ export default function Home() {
   }, [outputs.length, showSidebarLogo])
 
   const processMessages = useCallback(async (messages: Message[]) => {
-    // Create chat outputs for each message
-    const outputIds = messages.map(() => Date.now().toString() + Math.random().toString(36).substr(2, 9))
-    const newOutputs = messages.map((message, index) => ({
-      id: outputIds[index],
+    // Create separate chat outputs for each message (user messages)
+    const userOutputs = messages.map((message) => ({
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       question: message.content,
       response: '',
-      isComplete: false,
-      toolCalls: []
+      isComplete: true,
+      toolCalls: [],
+      isUserOnly: true
     }))
 
-    setOutputs(prev => [...prev, ...newOutputs])
+    // Create a single response output for the AI
+    const responseOutputId = Date.now().toString() + Math.random().toString(36).substr(2, 9)
+    const responseOutput = {
+      id: responseOutputId,
+      question: '',
+      response: '',
+      isComplete: false,
+      toolCalls: [],
+      isUserOnly: false
+    }
+
+    // Add all user messages and the AI response output
+    setOutputs(prev => [...prev, ...userOutputs, responseOutput])
+    const outputIds = [responseOutputId]
 
     try {
       const response = await fetch(`${API_BASE_URL}/chat`, {
@@ -192,6 +205,19 @@ export default function Home() {
       await processMessages(messagesToProcess)
     } finally {
       setIsGenerating(false)
+    }
+  }, [isGenerating, messageQueue, processMessages])
+
+  // Process queued messages when generation completes
+  useEffect(() => {
+    if (!isGenerating && messageQueue.length > 0) {
+      const queuedMessages = [...messageQueue]
+      setMessageQueue([])
+      setIsGenerating(true)
+      
+      processMessages(queuedMessages).finally(() => {
+        setIsGenerating(false)
+      })
     }
   }, [isGenerating, messageQueue, processMessages])
 

@@ -26,7 +26,7 @@ export function ChatTextArea({ onSendMessage, isGenerating, className }: ChatTex
   }
 
   const handleSubmit = () => {
-    if (text.trim() && !isGenerating) {
+    if (text.trim()) {
       const message: Message = {
         role: 'user',
         content: text.trim()
@@ -66,12 +66,11 @@ export function ChatTextArea({ onSendMessage, isGenerating, className }: ChatTex
           onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
           className="h-10 min-h-[40px] max-h-[200px] resize-none border-zinc-300 dark:border-zinc-600 focus:border-zinc-900 dark:focus:border-white focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 rounded-lg px-3 py-2 leading-tight"
-          disabled={isGenerating}
         />
       </div>
       <Button
         onClick={handleSubmit}
-        disabled={!text.trim() || isGenerating}
+        disabled={!text.trim()}
         size="icon"
         className="h-10 w-10 shrink-0 bg-zinc-800 dark:bg-white hover:bg-zinc-700 dark:hover:bg-zinc-100 focus:ring-2 focus:ring-zinc-500/20 shadow-lg border-0 rounded-lg transition-all duration-200 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-white dark:text-zinc-900"
       >

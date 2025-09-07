@@ -36,18 +36,37 @@ function ThinkingIndicator({ hasResponse, isComplete }: { hasResponse: boolean, 
 }
 
 export function ChatOutput({ output, className }: ChatOutputProps) {
-  return (
-    <div className={cn("space-y-6", className)}>
-      {/* User Question */}
-      <div className="flex justify-end items-start">
-        <div className="max-w-[70%]">
-          <Card className="bg-zinc-800 dark:bg-white text-white dark:text-zinc-900 shadow-lg border-0">
-            <CardContent className="px-4 py-3">
-              <p className="text-sm leading-relaxed">{output.question}</p>
-            </CardContent>
-          </Card>
+  if (output.isUserOnly) {
+    // Only show user message for user-only outputs
+    return (
+      <div className={cn("space-y-6", className)}>
+        <div className="flex justify-end items-start">
+          <div className="max-w-[70%]">
+            <Card className="bg-zinc-800 dark:bg-white text-white dark:text-zinc-900 shadow-lg border-0">
+              <CardContent className="px-4 py-3">
+                <p className="text-sm leading-relaxed">{output.question}</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
+    )
+  }
+
+  return (
+    <div className={cn("space-y-6", className)}>
+      {/* User Question (only if not user-only and has question) */}
+      {output.question && (
+        <div className="flex justify-end items-start">
+          <div className="max-w-[70%]">
+            <Card className="bg-zinc-800 dark:bg-white text-white dark:text-zinc-900 shadow-lg border-0">
+              <CardContent className="px-4 py-3">
+                <p className="text-sm leading-relaxed">{output.question}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
 
       {/* Assistant Response */}
       <div className="flex justify-start items-start">
