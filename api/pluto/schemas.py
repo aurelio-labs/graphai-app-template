@@ -8,10 +8,10 @@ class Role(StrEnum):
     USER = "user"
     ASSISTANT = "assistant"
 
-class Message(BaseModel):
+class Event(BaseModel):
     role: Role = Field(
         ...,
-        description="The role of the message sender",
+        description="The role of the event sender",
         examples=[Role.SYSTEM, Role.USER, Role.ASSISTANT],
     )
     content: str = Field(
@@ -19,3 +19,14 @@ class Message(BaseModel):
         description="Text content from system, user, or assistant"
     )
 
+class ChatRequest(BaseModel):
+    messages: list[Event] = Field(
+        ...,
+        description="List of events to send to the chatbot",
+        examples=[
+            [
+                Event(role=Role.ASSISTANT, content="Hello, how are you?"),
+                Event(role=Role.USER, content="I'm fine, thanks.")
+            ]
+        ]
+    )
