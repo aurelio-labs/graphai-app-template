@@ -11,6 +11,19 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
       - agentdemo
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:8000
+    depends_on:
+      - api
+    networks:
+      - agentdemo
   
   jaeger:
     image: jaegertracing/all-in-one
